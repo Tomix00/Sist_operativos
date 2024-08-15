@@ -24,10 +24,6 @@ titulo(){
     done
 }
 
-# titulo "1-a" "Muestra informacion de la cpu" "cat /proc/cpuinfo"
-# cat /proc/cpuinfo
-# sleep 5
-
 titulo "1" "Muestra las lineas donde matchea lo indicado - 'model name'" "grep 'model name' /proc/cpuinfo"
 grep 'model name' /proc/cpuinfo
 sleep 5
@@ -39,8 +35,12 @@ echo -e "\n"
 grep 'model name' /proc/cpuinfo | wc -l
 sleep 5
 
-
-
-
+titulo "3" "Recorta una columna especifica, elimina los espacios en blanco y los guarda en un archivo nombes.csv" "cut -d';' -f2 heroes.csv | grep . >> nombres.csv "
+echo "pequeña muestra de heroes.csv:"
+head heroes.csv
+sleep 3
+echo -e "\n"
+cut -d';' -f2 heroes.csv | grep . >> nombres.csv
+sleep 5
 clear
 echo "end of script"
