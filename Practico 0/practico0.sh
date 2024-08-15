@@ -42,5 +42,7 @@ sleep 3
 echo -e "\n"
 cut -d';' -f2 heroes.csv | grep . >> nombres.csv
 sleep 5
+
+
 clear
 echo "end of script"
