@@ -40,6 +40,18 @@ cut -d';' -f2 heroes.csv | grep . >> nombres.csv
 echo "Chequee el archivo nombres.csv en su directorio"
 sleep 5
 
+titulo "4" "Obtener fecha de min(minimas) y max(maximas) de temperaturas" "sort -k5 -n -t' ' weather_cordoba.in | ... | cut -d' ' -f1-3"
+echo "fecha de temperatura maxima: "
+echo "comando: sort -k5 -n -t' ' weather_cordoba.in | tail -n 1 | cut -d' ' -f1-3"
+sort -k5 -n -t' ' weather_cordoba.in | tail -n 1 | cut -d' ' -f1-3
+echo -e "\n"
+
+echo "fecha de temperatura minima: "
+echo "comando: sort -k5 -n -t' ' weather_cordoba.in | head -n 1 | cut -d' ' -f1-3"
+sort -k5 -n -t' ' weather_cordoba.in | head -n 1 | cut -d' ' -f1-3
+sleep 5
+
+
 # fecha de maxima de maximas
 # sort -k5 -n -t' ' weather_cordoba.in | tail -n 1 | cut -d' ' -f1-3
 # fecha de minima de minimas
