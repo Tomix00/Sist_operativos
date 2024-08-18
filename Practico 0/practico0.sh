@@ -36,7 +36,7 @@ grep 'model name' /proc/cpuinfo | wc -l
 sleep 7
 
 titulo "3" "Recorta una columna especifica, elimina los espacios en blanco y los guarda en un archivo nombes.csv" "cut -d';' -f2 heroes.csv | grep . >> nombres.csv "
-cut -d';' -f2 heroes.csv | grep . >> nombres.csv
+#cut -d';' -f2 heroes.csv | grep . >> nombres.csv
 echo "Chequee el archivo nombres.csv en su directorio"
 sleep 7
 
@@ -52,9 +52,10 @@ sort -k5 -n -t' ' weather_cordoba.in | head -n 1 | cut -d' ' -f1-3
 sleep 7
 
 titulo "5" "Ordenar por ranking atpplayers.in" "sort -k3 -n -t' ' >> atpplayers_ranked.txt"
-sort -k3 -n -t' ' atpplayers.in >> atpplayers_ranked.txt
+#sort -k3 -n -t' ' atpplayers.in >> atpplayers_ranked.txt
 echo "Chequee el archivo atpplayers_ranked.txt en su directorio"
 sleep 7
+
 
 clear
 echo "end of script"
