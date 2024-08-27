@@ -1,0 +1,26 @@
+command.c
+	\funcion command
+	\funcion pipeline
+builtin.c
+execute.c
+parcing.c
+
+mybash.c
+--------------------------------------------------------------------------------
+pipilines functions (done *, partial done /*)
+- new*
+- is_empty*
+- get_wait*
+- length *
+
+- destroy /* (falta adaptar para cuando tiene >=1 comand)
+- front /* (falta implementacion de glib)
+
+- push_back 
+- pop_front
+- set_wait
+
+- to_string
+
+
+
