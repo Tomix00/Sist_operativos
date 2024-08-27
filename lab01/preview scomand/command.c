@@ -5,18 +5,16 @@
 
 
 struct pipeline_s{
-    GQueue commands;
+    GSList *commands;
     bool wait;
 };
-
 
 pipeline pipeline_new(void){
     pipeline result;
     result = malloc(sizeof(struct pipeline_s));
 
-    result->commands.head = NULL;
-    result->commands.tail = NULL;
-    result->commands.length = 0;
+    result->commands = NULL;
+
     result->wait = true;
 
     assert(result != NULL);
@@ -29,10 +27,8 @@ pipeline pipeline_new(void){
 pipeline pipeline_destroy(pipeline self){
     assert(self != NULL);
 
-    if(pipeline_is_empty(self)){
-        free(self);
-        self = NULL;
-    }
+    g_slist_free_full(self->commands,NULL);
+    free(self);
 
     self = NULL;
 
@@ -50,20 +46,20 @@ void pipeline_set_wait(pipeline self, const bool w);
 bool pipeline_is_empty(const pipeline self){
     assert(self != NULL);
 
-    return self->commands.length == 0;
+    return g_slist_length(self->commands) == 0;
 }
 
 unsigned int pipeline_length(const pipeline self){
     assert(self != NULL);
 
-    return self->commands.length;
+    return g_slist_length(self->commands);
 }
 
 scommand pipeline_front(const pipeline self){
     assert(self != NULL && !pipeline_is_empty(self));
 
     scommand result;
-    result = self->commands.head;
+    result = self->commands->data;
 
     assert(result != NULL);
 
