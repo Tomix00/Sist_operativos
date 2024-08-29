@@ -11,6 +11,107 @@
 #define CHR_PIPE "|"
 #define CHR_BACKGROUND "&"
 
+/*--------------------scommand implementation--------------------*/
+
+struct scommand_s {
+    GSList* command;
+    char* input;
+    char* output;
+};
+
+scommand scommand_new(void) {
+    scommand result;
+    result = malloc(sizeof(struct scommand_s));
+    result->input = NULL;
+    result->output = NULL;
+    result->command = NULL;
+
+    assert(result != NULL && scommand_is_empty(result));
+    assert(scommand_get_redir_in (result) == NULL);
+    assert(scommand_get_redir_out (result) == NULL);
+
+    return result;
+}
+
+scommand scommand_destroy(scommand self){
+    assert(self!=NULL);
+
+    //for (guint i = 0; i < g_slist_length(self->command); i++)
+    //{
+    //    free((char*)g_slist_nth(self->command, i));
+    //}
+    //g_slist_free(self->command);
+    //free(self->input);
+    //free(self->output);
+    //free(self);
+    //self = NULL;
+
+    while(self->command != NULL){
+        scommand_pop_front(self);
+    }
+    free(self);
+    self = NULL;
+
+    assert(self==NULL);
+    return self;
+}
+
+void scommand_push_back(scommand self, char * argument){
+    assert(self!=NULL);
+    assert(argument!=NULL);
+
+    self->command = g_slist_append(self->command, (gpointer)argument);
+
+    assert(!scommand_is_empty(self));
+}
+
+void scommand_pop_front(scommand self){
+    assert(self!=NULL);
+    assert(!scommand_is_empty(self));
+
+    self->command = g_slist_delete_link(self->command, self->command);
+}
+
+void scommand_set_redir_in(scommand self, char * filename){
+    assert(self!=NULL);
+
+    self->input = filename;
+}
+
+void scommand_set_redir_out(scommand self, char * filename){
+    assert(self!=NULL);
+
+    self->output = filename;
+}
+
+bool scommand_is_empty(const scommand self){
+    assert(self!=NULL);
+
+    bool result = false;
+    if (g_slist_length(self->command)==0 && self->input == NULL && self->output == NULL){
+        result = true;
+    }
+
+    return result;
+}
+
+char * scommand_get_redir_in(const scommand self){    
+    assert(self!=NULL);
+
+    char *result = self->input;
+
+    return result;
+}
+
+char * scommand_get_redir_out(const scommand self){
+    assert(self!=NULL);
+
+    char *result = self->output;
+
+    return result;
+}
+
+/*--------------------pipeline implementation--------------------*/
 
 struct pipeline_s{
     GSList *commands;
@@ -95,34 +196,34 @@ bool pipeline_get_wait(const pipeline self){
     return self->wait;
 }
 
-char * pipeline_to_string(const pipeline self){
-    assert(self != NULL);
-
-    char *result = (char*)g_strdup("");
-    char *str = NULL;
-    GSList* current_command = NULL;
-
-    current_command = self->commands;
-    while (current_command != NULL){
-        result = strmerge(result, str=scommand_to_string(current_command->data));
-        free(str);
-        current_command = g_slist_next(current_command);
-        if(current_command != NULL){
-            result = strmerge(result,CHR_SPACE);
-            result = strmerge(result,CHR_PIPE);
-            result = strmerge(result,CHR_SPACE);
-        }
-    }
-
-    assert(pipeline_is_empty(self) || strlen(result)>0);
-    /* 
-    * 
-    * 
-    * situacion para cuando pipeline tiene wait=true
-    * 
-    * 
-    */
-    
-    return result;
-}
+//char * pipeline_to_string(const pipeline self){
+//    assert(self != NULL);
+//
+//    char *result = (char*)g_strdup("");
+//    char *str = NULL;
+//    GSList* current_command = NULL;
+//
+//    current_command = self->commands;
+//    while (current_command != NULL){
+//        result = strmerge(result, str=scommand_to_string(current_command->data));
+//        free(str);
+//        current_command = g_slist_next(current_command);
+//        if(current_command != NULL){
+//            result = strmerge(result,CHR_SPACE);
+//            result = strmerge(result,CHR_PIPE);
+//            result = strmerge(result,CHR_SPACE);
+//        }
+//    }
+//
+//    assert(pipeline_is_empty(self) || strlen(result)>0);
+//    /* 
+//    * 
+//    * 
+//    * situacion para cuando pipeline tiene wait=true
+//    * 
+//    * 
+//    */
+//    
+//    return result;
+//}
 
