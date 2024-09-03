@@ -87,7 +87,7 @@ bool scommand_is_empty(const scommand self);
  * Requires: self!=NULL
  */
 
-unsigned int scommand_length(const scommand self);
+unsigned int scommand_length(const scommand self); //MARIANO
 /*
  * Da la longitud de la secuencia cadenas que contiene el comando simple.
  *   self: comando simple a medir.
@@ -97,7 +97,7 @@ unsigned int scommand_length(const scommand self);
  *
  */
 
-char * scommand_front(const scommand self);
+char * scommand_front(const scommand self); // MARIANO
 /*
  * Toma la cadena de adelante de la secuencia de cadenas.
  *   self: comando simple al cual tomarle la cadena del frente.
@@ -118,7 +118,7 @@ char * scommand_get_redir_out(const scommand self);
  * Requires: self!=NULL
  */
 
-char * scommand_to_string(const scommand self);
+char * scommand_to_string(const scommand self); // MARIANO
 /* Preety printer para hacer debugging/logging.
  * Genera una representación del comando simple en un string (aka "serializar")
  *   self: comando simple a convertir.
@@ -132,12 +132,10 @@ char * scommand_to_string(const scommand self);
  */
 
 
-//------------------------------------------------------------------------------------------------------------------------
 /*
  * pipeline: tubería de comandos.
  * Ejemplo: ls -l *.c > out < in  |  wc  |  grep -i glibc  &
  * Secuencia de comandos simples que se ejecutarán en un pipeline,
- * 
  *  más un booleano que indica si hay que esperar o continuar.
  *
  * Una vez que un comando entra en el pipeline, la memoria pasa a ser propiedad
@@ -156,9 +154,9 @@ typedef struct pipeline_s * pipeline;
 
 pipeline pipeline_new(void);
 /*
- *  Nuevo `pipeline', sin comandos simples y establecido para que espere.
- *  Returns: nuevo pipeline sin comandos simples y que espera.
- *  Ensures: result != NULL
+ * Nuevo `pipeline', sin comandos simples y establecido para que espere.
+ *   Returns: nuevo pipeline sin comandos simples y que espera.
+ * Ensures: result != NULL
  *  && pipeline_is_empty(result)
  *  && pipeline_get_wait(result)
  */
