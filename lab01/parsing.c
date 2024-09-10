@@ -72,7 +72,7 @@ pipeline parse_pipeline(Parser p) {
             //Guardamos en aux_parser la parte que queremos parsear
             Parser aux_parser = parser_new(input);
         
-            while(!parser_at_eof(aux_parser) && !error &){   
+            while(!parser_at_eof(aux_parser) && !error){   
                 cmd = parse_scommand(aux_parser);
                 error = (cmd==NULL);
                 
