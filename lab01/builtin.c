@@ -6,6 +6,7 @@
 
 #include "builtin.h"
 #include "strextra.h"
+#include "tests/syscall_mock.h"
 
  #include <unistd.h>
 

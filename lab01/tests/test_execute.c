@@ -7,6 +7,7 @@
 #include "syscall_mock.h"
 #include "../execute.h"
 
+#include <stdio.h>
 /* Precondiciones */
 
 START_TEST (test_pipeline_null)
@@ -33,7 +34,7 @@ static void teardown (void) {
 /* Funcionalidad */
 
 START_TEST (test_null)
-{
+{   
     /* Ejecuta un comando nulo (pipeline vacío) */
     execute_pipeline (test_pipe);
     /* Esto no debería haber tratado de crear ni destruir procesos */
@@ -92,7 +93,7 @@ START_TEST (test_builtin_chdir)
 END_TEST
 
 START_TEST (test_external_1_simple_parent)
-{
+{   
     /* Ejecuta un comando simple, sin argumentos. Verifica que el padre haga
      * lo que corresponde
      */
@@ -104,9 +105,7 @@ START_TEST (test_external_1_simple_parent)
     mock_fork_setup (pids);
     /* Queremos que wait encuentre al hijo que termina: */
     mock_wait_setup (pids);
-
     execute_pipeline (test_pipe);
-
     /* Esto no fabrica pipes, ni redirecciona, ni manipula archivos*/
     ck_assert_msg (mock_counter_pipe==0, NULL);
     ck_assert_msg (mock_counter_open==0, NULL);
@@ -166,7 +165,7 @@ START_TEST (test_external_1_simple_child)
 END_TEST
 
 START_TEST (test_external_1_simple_background)
-{
+{   
     /* Ejecuta un comando simple, en bg, sin argumentos. Verifica que el padre
      * haga lo que corresponde
      */
@@ -210,19 +209,21 @@ START_TEST (test_external_arguments)
     pipeline_push_back (test_pipe, ext_cmd);
     /* Queremos que el fork devuelva 0, para testear el hijo */
     mock_fork_setup (pids);
-
+    
     EXIT_PROTECTED (
         execute_pipeline (test_pipe);
     );
-
+    
     /* Estamos mirando al hijo. debería haber pasado por un fork */
     ck_assert_msg (mock_counter_fork==1, NULL);
+    
     /* Hizo un exec */
     ck_assert_msg (mock_counter_execvp==1, NULL);
     ck_assert_msg (mock_counter_exit==0, NULL);
 
     /* Hizo el exec con los argumentos correctos */
     ck_assert_msg (strcmp (mock_execvp_last_file,"command")==0, NULL);
+    
     ck_assert_msg (mock_execvp_last_argv[0]!=NULL && strcmp (mock_execvp_last_argv[0],"command")==0, NULL);
     ck_assert_msg (mock_execvp_last_argv[1]!=NULL && strcmp (mock_execvp_last_argv[1],"arg1")==0, NULL);
     ck_assert_msg (mock_execvp_last_argv[2]!=NULL && strcmp (mock_execvp_last_argv[2],"-arg2")==0, NULL);

@@ -137,37 +137,61 @@ char * scommand_get_redir_out(const scommand self){
 char * scommand_to_string(const scommand self){
     assert(self != NULL);
 
-    char * result = g_strdup("");
+    char * result = strdup("");
+    if(!scommand_is_empty(self)){
+        char * aux = result;
 
-    GSList *current_arg = NULL;
-    current_arg = self->command;
 
-    while(current_arg != NULL){
-        char *arg;
-        arg = (char *)current_arg->data;
+        GSList *current_arg = NULL;
+        current_arg = self->command;
 
-        result = strmerge(result,arg);
-        current_arg = g_slist_next(current_arg);
+        while(current_arg != NULL){
+            char *arg;
+            arg = (char *)current_arg->data;
 
-        if(current_arg != NULL){
-            result = strmerge(result,CHR_SPACE);
+            result = strmerge(aux,arg);
+            free(aux);
+            aux = result;
+            current_arg = g_slist_next(current_arg);
+
+            if(current_arg != NULL){
+                result = strmerge(aux,CHR_SPACE);
+                free(aux);
+                aux = result;
+            }
         }
-    }
-    assert(scommand_is_empty(self) || strlen(result)>0);
+        assert(scommand_is_empty(self) || strlen(result)>0);
 
-    if(scommand_get_redir_in(self) != NULL){
-        result = strmerge(result, CHR_SPACE);
-        result = strmerge(result, CHR_REDIR_IN);
-        result = strmerge(result, CHR_SPACE);
-        result = strmerge(result, scommand_get_redir_in(self));
-    }
-    assert (scommand_get_redir_in(self)==NULL || strlen(result)>0);
+        if(scommand_get_redir_in(self) != NULL){
+            result = strmerge(aux, CHR_SPACE);
+            free(aux);
+            aux = result;
+            result = strmerge(aux, CHR_REDIR_IN);
+            free(aux);
+            aux = result;
+            result = strmerge(aux, CHR_SPACE);
+            free(aux);
+            aux = result;
+            result = strmerge(aux, scommand_get_redir_in(self));
+            free(aux);
+            aux = result;
 
-    if(scommand_get_redir_out(self) != NULL){
-        result = strmerge(result, CHR_SPACE);
-        result = strmerge(result, CHR_REDIR_OUT);
-        result = strmerge(result, CHR_SPACE);
-        result = strmerge(result, scommand_get_redir_out(self));
+        }
+        assert (scommand_get_redir_in(self)==NULL || strlen(result)>0);
+
+        if(scommand_get_redir_out(self) != NULL){
+            result = strmerge(aux, CHR_SPACE);
+            free(aux);
+            aux = result;
+            result = strmerge(aux, CHR_REDIR_OUT);
+            free(aux);
+            aux = result;
+            result = strmerge(aux, CHR_SPACE);
+            free(aux);
+            aux = result;
+            result = strmerge(aux, scommand_get_redir_out(self));
+            free(aux);
+        }
     }
     assert (scommand_get_redir_out(self)==NULL || strlen(result)>0);
     return result;
@@ -265,30 +289,45 @@ bool pipeline_get_wait(const pipeline self){
 char * pipeline_to_string(const pipeline self){
    assert(self != NULL);
 
-   char *result = (char*)g_strdup("");
-   char *str = NULL;
-   GSList* current_command = NULL;
+    char* result = strdup("");
+   if(!pipeline_is_empty(self)){
+    char *aux = result;
+    char *str = NULL;
 
-   current_command = self->commands;
-   while (current_command != NULL){
-       result = strmerge(result, str=scommand_to_string(current_command->data));
-       free(str);
-        current_command = g_slist_next(current_command);
-       if(current_command != NULL){
-           result = strmerge(result,CHR_SPACE);
-           result = strmerge(result,CHR_PIPE);
-           result = strmerge(result,CHR_SPACE);
-       }
-   }
-   if (self->wait == false)
-   {
-        result = strmerge(result,CHR_SPACE);
-        result = strmerge(result,CHR_BACKGROUND);
-        result = strmerge(result,CHR_SPACE);
-   }
-   
-   assert(pipeline_is_empty(self) || strlen(result)>0);
-   
+    GSList* current_command = NULL;
+
+    current_command = self->commands;
+    while (current_command != NULL){
+        result = strmerge(aux, str=scommand_to_string(current_command->data));
+        free(str);
+        free(aux);
+        aux = result;
+         current_command = g_slist_next(current_command);
+        if(current_command != NULL){
+            //result = strmerge(result,CHR_SPACE);
+            //result = strmerge(result,CHR_PIPE);
+            //result = strmerge(result,CHR_SPACE);
+            result = strmerge(aux," | ");
+            free(aux);
+            aux = result;
+        }
+    }
+    if (self->wait == false)
+    {
+         result = strmerge(aux,CHR_SPACE);
+         free(aux); 
+         aux = result;
+
+         result = strmerge(aux,CHR_BACKGROUND);
+         free(aux); 
+         aux = result;
+
+         result = strmerge(aux,CHR_SPACE);
+         free(aux);
+    }
+    
+ }  
+ assert(pipeline_is_empty(self) || strlen(result)>0); 
    return result;
 }
 

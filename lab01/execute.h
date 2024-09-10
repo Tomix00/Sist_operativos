@@ -7,6 +7,8 @@
 
 #include "command.h"
 
+void execute_scommand(scommand command);
+
 
 void execute_pipeline(pipeline apipe);
 /*

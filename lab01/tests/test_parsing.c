@@ -92,7 +92,6 @@ START_TEST (test_consumes_until_newline)
 
     init_parser("ls\n--------\n\n\n");
     output = parse_pipeline(parser);
-
     /* Consumió hasta el \n equivocado? */
     ck_assert_msg (!parser_at_eof(parser), NULL);
     arg_kind_t type=ARG_NORMAL;
@@ -191,8 +190,10 @@ START_TEST (test_command_background)
 
     init_parser("comando arg1 &\n");
     output = parse_pipeline(parser);
+    
     /* Esto debería generar un pipeline con el flag de no esperar */
     ck_assert_msg (pipeline_length (output) == 1, NULL);
+
     s = pipeline_front (output);
     ck_assert_msg (scommand_length (s) == 2, NULL);
     check_argument (s, "comando");
@@ -202,6 +203,7 @@ START_TEST (test_command_background)
     ck_assert_msg (scommand_get_redir_out (s) == NULL, NULL);
     /* Y no es en background */
     ck_assert_msg (! pipeline_get_wait (output), NULL);
+
 }
 END_TEST
 

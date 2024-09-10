@@ -1,4 +1,3 @@
- 
 #include <ctype.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -505,4 +504,5 @@ int ping_pong_loop(char *password) {
     }
     return 0;
 }
+ 
  
