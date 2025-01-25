@@ -1,0 +1,115 @@
+Virtualizacion de la cpu
+	Real time = Wall_time
+		tiempo que pasa total
+	User time = Cpu_time
+		tiempo que se ultilizo una cpu para ejecutar este programa
+		tiempo que pasa la cpu ejecutando en modo user
+	Sys time
+		tiempo que estuvo en modo kernel
+
+	CPU_bound puro: compuntan si hacer nada mas(no entra en kernel)
+	IO_bound : reciben io constantemente
+
+	T_arrival:		tiempo de llegada de un proces
+	T_completion:	tiempo cuando termina un proceso
+	T_firstrun:		tiempo en que es Scheduled
+
+	T_turnaround:	T_completion - T_arrival
+	T_response:		T_firstrun - T_arrival
+
+	---------
+	definiciones utiles:
+		thread:	hilo, son subprocesos que llevan datos y espacio de direcciones
+	---------
+	llamadas de terminal:
+		env:	variables de entorno
+		ulimit:	limites definidos
+		watch <compiled>:	permite ver mulitples ejecuciones del compilado
+		strace:	para ver las llamadas de syscall
+	---------
+	syscalls:
+		fork:	copia el procesos altual y crea dos procesos independientes(hijo y padre)
+		wait:	guarda el pid del hijo, para asegurarse que se termine y luego seguir con el padre
+		execv:	ejecuta comandos por terminal, si funciona no realiza lo que le sigue al mismo
+		open:	abre un archivo, con modos y permisos, asignando un file-descriptor al mismo
+		close:	cierra el file-descriptor
+		dup:	duplica el file-descriptor al primer lugar que este libre
+	
+Virtualizacion de la memoria
+
+El programa realmente no esta en una direccion de memoria fisica de 0 a 16kb, sino que esta cargada en alguna direccion fisica arbitraria.
+cuando el SO hace esto, se le llama Virtualizacion de la memoria, porque el programa corriendo piensa que esta cargado en memoria 0 y que tiene una espacio de direccion largo, lo cual no es cierto.
+
+Objetivos:
+	transparencia:	El programa no debe saber que la memoria esta virtualizada, detras de escena el SO realiza todo el trabajo de mulitplexar la memoria sobre los demas procesos.
+	Eficiencia:		El SO debe hacer la Virtualizacion lo mas eficiente posible, en terminos de tiempo y espacio, para el tiempo puede ayudarse del hardware mediante TLB's.
+	Proteccion:		El SO debe asegurarse de protejer el procesos de otro y de si mismo, asi no se pisan entre si o modifican. Esta misma da la ventaja de "aislamiento" entre procesos, permitiendo asi que cada proceso se ejecute en su propia caja.
+
+Esquema simple de memoria:
+	____
+	program code
+	heap
+	  |
+	  v
+
+	  ^
+	  |
+	stack
+	_____
+
+
+tipos de memoria
+	en un programa de c, hay dos tipos stack y heap.
+	stack, donde se realizan allocation y deallocations, y son manejas por el compilador.(memoria automatica, Pe. int x;)
+	heap, donde todas las allocation y deallocations son realizadas por el usuario.(Pe. int *x = (int *)malloc(sizeof(int)); )
+
+Funciones:
+	malloc:
+		void* malloc(size_t size);
+		double* d = (double *)malloc(sizeof(double));
+		Es "mas comodo" pasar por parametro a sizeof() el typo en ves de a malloc los bytes.
+		sizeof() es un operador que funciona en compile-time, a diferencia de una llamada de funcion que es en run-time.
+		
+		Ej:
+			int *x = malloc(10*sizeof(int));
+			printf("%d\n",sizeof(x));
+
+			Primero se declara espacio para un array de 10 integers, pero cuando se llama a sizeof(), dara un valor chico, como 4, es porque en este caso sizeof() esta viendo el tamaño de un pointer a un entero.
+
+			int x[10];
+			printf("%d\n",sizeof(x));
+
+			En este caso, hay suficiente informacion estatica para que el compilador sepa que 40 bytes fueron resevados.
+			Para strings, es mejor malloc(strlen(s)+1); , ya que asi se para el largo del string y +1 para el caracter de final de linea.
+
+		La funcion retorna un pointer a void,devolviendo asi una direccion de memoria, por lo que es usual que en C se realize lo que se llama "cast", como anteriormente en "double...", no es estrictamente necesario pero es una manera de saber que se esta haciendo.
+	free:
+		void free(void *ptr);
+		int *x = malloc(10 * sizeof(int));
+		...
+		free(x);
+
+		toma el puntero retornado por malloc.
+
+Llamadas de terminal:
+	objdump: recibe el archivo compilado y lo traduce a assembly
+
+definiciones:
+	base:					direccion base del proceso
+	bound:					direccion limite del proceso, ambas se utilizan para realizar tranducciones de direcciones y verificar los limites de uso.
+	PCB:					process control block, estructura de datos donde se guarda la informacion del proceso(direccion, bounds,id,etc.)
+	free-list:				lista de los espacios libres en memoria
+	paging:					asignar espacio en tamaños predefinidos en memoria virtual.
+	page:					separar la direccion de espacio del proceso en dos espacios predefinidos, a cada uno se le llama page.
+	page-frame:				la memoria fisica se la ve como un array de lugares de espacios predefinidos llamados page-frames.
+	page-table:				estructura de datos que guarda la direccion de cada virtual page ubicada en memoria fisica.
+	virtual page number:	(VPN) numero referente a la virtual page.
+	offset:					lugar en donde nos interesa de la page.
+	physical frame number:	(PFN) o physical page number(PPN), es el numero de page frame donde esta ubicado la virtual page en la memoria fisica.
+	page table entry:		estructura de datos que se utiliza para mapear direcciones virtual a direcciones fisicas.
+	address-translation:	tranduccion de difreccion de memoria vitual a direccion memoria fisica.
+	TLB:					translation-lookaside buffer, una parte del chip de MMU(memory management unit), que funciona como un cache de las translaciones de las direciones virtuales a fisicas mas populares.
+
+base and bounds vitualisation
+	add the base to the virtual address --> phisicall address
+	
