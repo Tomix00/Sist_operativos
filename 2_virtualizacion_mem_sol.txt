@@ -1,0 +1,353 @@
+Ejercicio 1:
+    Variable	lugar		
+    b	        stack		
+    *b	        heap		
+    N	        Program Code(constante literal)		
+    i	        stack		
+    s	        registro de la cpu		
+    argc	    stack		
+    argv	    stack		
+    return s	stack		
+    a[N]	    data segment		
+
+Ejercicio 2:
+    char *s = malloc(512)
+    gets(s)
+    {Uso inseguro de gets(), no verifica si se excede el tamaño del buffer} 
+
+    char *s = "Hello World";
+    char *s = malloc(strlen(s));
+    strcpy(d,s);
+    {deberia ser strlen(s)+1, ya que falta incluir el carater de fin de linea}
+
+    char *s = "Hello World";
+    char *s = malloc(strlen(s));
+    d = strdup(s);
+    {no se debe realizar malloc, ya que se encarga strdup del mismo} 
+
+    int *a = malloc(16);
+    a[15] = 42;
+    {reserva 16bytes, pero no de sizeof(int), por lo que a[15], sera a[15*4], es decir a[60], lo cual esta super fuera de lo que se reservo por malloc}
+
+Ejercicio 3:
+    a) F, es una funcion de la libreria estandar de C.
+    b) F, cuando hay memoria libre, reutiliza la memoria ya asignada.
+    c) V, cuando se necesita allocar memoria y no hay libre disponible
+    d) V, cuando se alloco una gran cantidad, es mejor utilizar la syscall brk() para achicar y asi finalmente ser liberada.
+    e) F, se reserva memoria en demanda.
+
+Ejercicio 4:
+    Secuencia de acceso a memoria virtual o traza de memoria.(ratro de ejecucion que procude la memoria)
+    0,5,128,8,10,256,13
+
+    0	movl $128, %ebx			lee 128 y lo guarda en %ebx			
+    5	movl (%ebx), %eax		lee la direccion de memoria de %ebx, y la guarda en %eax			
+    8	shll $1,  %ebx			realiza un left bit shift a %ebx, quedando en 256			
+    10	movl (%ebx), %eax		lee la direccion de memoria de %ebx, y la guarda en %eax			
+    13	retq						
+
+Ejercicio 5:
+    NO
+
+Ejercicio 6:
+    NO
+
+Ejercicio 7:
+    NO
+
+Ejercicio 8:
+    NO
+
+Ejercicio 9:
+    layout    10KiB    4KiB	20KiB	18KiB	7KiB	9KiB	12KiB	15KiB
+                12KiB	10KiB	9KiB
+
+    first fit	20KiB	10KiB	18KiB
+    best fit	12KiB	10KiB	9KiB
+    worst fit	20KiB	18KiB	15KiB
+    next fit	20KiB	18KiB	9KiB
+
+Ejercicio 10:
+    obtener un valor de la TBL toma 10ns
+    la memoria principal tarda 120ns
+
+    TLB hit = 10ns + 120ns = 130ns
+    TLB miss = 10ns + 120ns + 120ns = 250ns
+
+    eff 95% -> TLB hit*0.95 = 130ns*0.95 = 123.5ns
+    fail 5% -> TLB miss*0.05 = 250ns*0.05 = 12.5ns
+
+    average time = 123.5ns + 12.5ns = 136ns
+
+Ejercicio 11:
+    pages = 4KiB
+    TLB = 64 entries
+
+    TLB falle = TLB miss, lo cual es que entre a una pagina nueva 
+    que no este en la TLB en cada ciclo.
+    a)
+        suponiendo que un entero es 4Bytes
+        cada pagina puede contener 
+        pages:      4KiB = 2^14 bytes = 4096 Bytes
+        pages/int:  4096 Bytes/4 = 1024 enteros
+        
+        siendo que tenemos 64 entradas, el total de enteros que pueden
+        ser reprencentados en 64 entradas es 64*1024 = 65536
+
+        Dado que cada página puede alojar 1024 enteros, el número N 
+        debe ser lo suficientemente grande como para exceder el número
+        total de enteros que pueden ser almacenados en 64 páginas
+
+        por lo tanto, N puede ser >=65537
+
+        Para que M no repita accesos por ciclo dentro de las mismas paginas,
+        debe ser mayor que el numero de enteros que se peude acceder en una
+        sola iteracion: 1024
+
+        N>65536
+        M>1024
+    b)
+        si el ciclo se repite muchas veces, la posibilidad de fallos de TLB
+        puede disminuir debido a que algunas entradas podrían permanecer en
+        la TLB, mejorando el rendimiento.
+
+Ejercicio 12:
+    page = 4KiB = 2^12 Bytes
+
+    Virt	Fis	    valid
+    0	    000	    1
+    1	    111	    1
+    2	    000	    0
+    3	    101	    1
+    4	    100	    1
+    5	    001	    1
+    6	    000	    0
+    7	    000	    0
+    8	    011	    1
+    9	    110	    1
+    10  	100	    1
+    11  	000	    0
+    12  	000	    0
+    13  	000	    0
+    14  	000	    0
+    15  	010	    1
+
+    a)
+        page = 4KiB = 2^12 Bytes
+
+        Como hay 16(0-15) direcciones virtual, se utilzarian 4bits(16 = 2^4)
+        En fisica, se utilizan 3 bits
+
+        para virtual sera:  4 + 12 = 16bits
+        para fisica sera:   3 + 12 = 15bits
+    b)
+        {39424} = 1001 1010 0000 0000
+            VPN = 1001 = 9
+            offset = 1010 0000 0000
+
+            V[VPN] = V[9] = 110 
+
+            Fisica = 110 1010 0000 0000 = 0x6A00
+        {12416} = 0011 0000 1000 0000
+            VPN = 0011 = 3
+            offset = 0000 1000 0000
+
+            V[VPN] = V[3] = 101
+
+            Fisica = 101 0000 1000 0000 = 0x5080
+        {32512} = 0111 1111 0000 0000
+            VPN = 0111 = 7
+            offset = 1111 0000 0000
+
+            V[VPN] = V[7] = 000
+
+            pero como la casilla de valid esta en 0, la direccion virtual no esta mapeada en fisica.
+    c)
+        {16385} = 0100 0000 0000 0001
+            fisica = 100
+            offset = 0000 0000 0001
+
+            hay dos virtuales que la utilizan
+
+            VPN = 4 = 0100
+            virtual = 0100 0000 0000 0001 = 16385
+
+            VPN = 10 = 1010
+            virtual = 1010 0000 0000 0001 = 40961
+        {4321} = 0001 0000 1110 0001
+            fisica = 0001
+            offset = 0000 1110 0001
+
+            VPN = 5 = 0101
+            virtual = 0101 0000 1110 0001 = 20705
+
+Ejercicio 13:
+    i386 (10,10,12)
+        10bits de page directory
+        10bits de page table
+        12bits de offset
+
+    {0x003FF666}
+        0x003FF666 = 0000 0000 0011 1111 1111 0110 0110 0110
+
+        tenemos:
+        PDI =       0000 0000 00    = 0
+        PTI =       11 1111 1111    = 1023
+        offset =    0110 0110 0110  = 0x666
+
+        Fisica = 0xCAEEA666
+    {0x00000AB0}
+        0x00000AB0 = 0000 0000 0000 0000 0000 1010 1011 0000
+
+        tenemos:
+        PDI =       0000 0000 00    = 0
+        PTI =       00 0000 0000    = 0
+        offset =    1010 1011 0000  = 0xAB0
+
+        Fisica = 0xCAFECAB0
+    {0x00800B0B}
+        0x00800B0B = 0000 0000 1000 0000 0000 1011 0000 1011
+
+        tenemos:
+        PDI =       0000 0000 10    = 2
+        PTI =       00 0000 0000    = 0
+        offset =    1011 0000 1011  = 0xB0B
+
+        Fisica = 0x{SE_OLVIDO}B0B
+
+Ejercicio 14:
+    VA = 32bits
+    PA = 32bits
+    en i386 (10,10,12)
+
+    a)  Tamaño de total ocupado por el directorio y las tablas de página para mapear 32 MiB al principio
+        de la memoria virtual.
+
+        Necesito
+            PD size
+            PT size
+        
+        Teniendo 12bits en offset, cada page tiene size = 2^12 bytes = 4KiB
+        
+        Para 32 MiB, necesito 32 MiB/4 KiB = 2^25/2^12 = 2^13 = 8*1024 = 8192 paginas
+
+        ahora sabiendo que tengo 10bits para mapear en PT, seran 2^10
+        Por lo que, utilizando la cantidad de paginas, para 32 MiB, 2^13/2^10 = 2^3 = 8 PT
+        
+        por lo tanto PT size sera = 8 * 4KiB = 2^3 * 2^12 bytes = 2^15bytes = 32 KiB
+
+        ahora sabiendo que cada page es 4 KiB
+
+        PD size es 4 KiB + 32 KiB = 36 KiB
+
+        PT size = 32 KiB
+        PD size = 36 KiB
+    b) Tamaño total del directorio y tablas de páginas si están mapeados los 4 GiB de memoria.
+
+        Necesito:
+            PD total size
+            PT total size
+    
+        4 GiB = 2^32 bytes , 32 bits de mapeo en memoria
+
+        PD -> 10 bits de mapeo, tenemos 2^10 = 1024 entradas
+        PT -> 10 bits de mapeo, tenemos 2^10 = 1024 entradas por tabla
+
+
+        Como cada PTE ocupa 4 bytes(32 bits), cada PT tiene un tamaño de 1024 * 4 bytes = 4096 bytes = 4 KiB
+        Cada PT mapea a 1024 entries * 4 KiB = 2^10 * 2^12 = 2^22 = 4 MiB de memoria
+
+        dado que hay 1024 entradas de directorio de paginas, el espacio total que se puede mapear es 1024 entries * 4 MiB = 2^10 * 2^22 = 2^32 = 4 GiB
+
+        PD total size = 1024 entries * 4 bytes/entrie = 4 KiB
+        PT total size = 1024 PDE => 1024 * 4 KiB = 4 MiB
+
+    c) Dado el ejercicio anterior ¿Ocuparı́a menos o más memoria si fuese una tabla de un solo nivel?
+        ocuparia menos memoria, ya que:
+
+        como solo habria un solo nivel, seria una sola tabla de paginas, 12 bits => 2^12 bytes = 4 KiB por pagina
+        con 32 bits de direcion virtual y 12 de desplazamiento, se tendria 32-12 = 20 bits para las direciones de paginas.
+        esto permite un total de 2^20 paginas virtuales
+        como cada PTE ocupa 4 bytes, el tamaño total de la tabla de paginas sera 2^20 entries * 4 bytes/entrie = 4 MiB
+        
+        en el anterior caso, teniamos 4 KiB + 4 MiB (2 niveles) y ahora solo 4 MiB(1 nivel)
+    d)
+        [0 MiB, 4 MiB) , [0 MiB, 4 MiB)
+            page size = 4 KiB
+            VA = [0 MiB, 4 MiB]
+            PA = [0 MiB, 4 MiB]
+            Total memory = 4 MiB
+            pages = 4 MiB / 4 KiB = 1024 pages
+
+            pages in [0 MiB, 4 MiB] -> 1024 pages
+
+            Dado que cada PT puede mapear 4 MiB, y dado que hay 1 PT para cada entrada del PD, en este mapeo solo se necesita 1 PDE
+
+            page directory
+            index   PA      Valid bit
+            0       0x000   1
+            1-1023  0x000   0
+
+            Page table
+            index   PA      Valid bit
+            0       0x000   1
+            1       0x001   1
+            2       0x002   1
+            ..      ..      ..
+            1023    0x03FF  1
+        [8 MiB, 8 MiB + 32 KiB)	[128 MiB, 128 MiB + 32 KiB)
+            Comienza desde 8 MiB y ocupa 32 KiB
+            total de memoria virtual = 32 KiB = 32 KiB / 4 KiB = 8 paginas
+        
+            Page directory
+            index   PA      valid bit
+            0       0x000   1
+            1       0x000   0
+            ..      ..      ..
+            8       0x080   1
+            9-1023  0x000   0
+
+            Page table(8)
+            index   PA      valid bit
+            0       0x080   1
+            1       0x080   1
+            2       0x080   1
+            3       0x080   1
+            4       0x080   1
+            5       0x080   1
+            6       0x080   1
+            7       0x080   1
+
+            Dado que este rango mapea un total de 8 paginas(32 KiB), cada pagina virtual del rango se asigna a un PF en 128 MiB (0x08000000)
+
+Ejercicio 15:
+    Por razones de diseño y gestión del sistema, el máximo es generalmente
+    3 GiB para aplicaciones de usuario, que es una restricción significativa
+    para ciertos tipos de aplicaciones que requieren grandes espacios de
+    memoria, es habitual que el kernel reserve el primer 1 GiB de espacio
+    de direcciones para uso del sistema operativo.
+
+Ejercicio 16:
+    NO
+
+Ejercicio 17:
+    a) V, porque de esa manera se logra el aislamiento total del mismo.
+    b) F, porque la memoria virtual no es necesariamente mas grande que la memoria fisica.
+    c) F, porque la TLB almacena los PFN mas populares.
+    d) V, por un femonomeno llamado aliasing o mapeo compartido, puede suceder durante la comparticion de recursos o implementacion de eficiencia.
+    e) F, una VP solo puede apuntar a una PP
+    f) F, se debe reservar un poco para el uso del sistema operativo y demas.
+    g) V, Compartiendo paginas fisicas.
+    h) F, No necesariamente, ya que hay algunas direcciones que estan invalidas para la eficiencia de la misma.
+    i) F, Cada proceso tiene su propio directorio de páginas, lo que permite un manejo y aislamiento efectivo de la memoria.
+    j) V, gracias al valit bit
+    k) F, ya que se hace una copia de la meoria virtual del padre.
+    l) V, ...
+    m) F, si es posible, solo que existe la posibilidad de obtener dos direciones virtuales.
+    n) V, considerando que 4 KiB es el tamaño típico de una página, es imposible.
+
+Ejercicio 18:
+    weird
+
+Ejercicio 19:
+    No

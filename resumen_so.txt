@@ -36,80 +36,241 @@ Virtualizacion de la cpu
 		dup:	duplica el file-descriptor al primer lugar que este libre
 	
 Virtualizacion de la memoria
-
-El programa realmente no esta en una direccion de memoria fisica de 0 a 16kb, sino que esta cargada en alguna direccion fisica arbitraria.
-cuando el SO hace esto, se le llama Virtualizacion de la memoria, porque el programa corriendo piensa que esta cargado en memoria 0 y que tiene una espacio de direccion largo, lo cual no es cierto.
-
-Objetivos:
-	transparencia:	El programa no debe saber que la memoria esta virtualizada, detras de escena el SO realiza todo el trabajo de mulitplexar la memoria sobre los demas procesos.
-	Eficiencia:		El SO debe hacer la Virtualizacion lo mas eficiente posible, en terminos de tiempo y espacio, para el tiempo puede ayudarse del hardware mediante TLB's.
-	Proteccion:		El SO debe asegurarse de protejer el procesos de otro y de si mismo, asi no se pisan entre si o modifican. Esta misma da la ventaja de "aislamiento" entre procesos, permitiendo asi que cada proceso se ejecute en su propia caja.
-
-Esquema simple de memoria:
-	____
-	program code
-	heap
-	  |
-	  v
-
-	  ^
-	  |
-	stack
-	_____
-
-
-tipos de memoria
-	en un programa de c, hay dos tipos stack y heap.
-	stack, donde se realizan allocation y deallocations, y son manejas por el compilador.(memoria automatica, Pe. int x;)
-	heap, donde todas las allocation y deallocations son realizadas por el usuario.(Pe. int *x = (int *)malloc(sizeof(int)); )
-
-Funciones:
-	malloc:
-		void* malloc(size_t size);
-		double* d = (double *)malloc(sizeof(double));
-		Es "mas comodo" pasar por parametro a sizeof() el typo en ves de a malloc los bytes.
-		sizeof() es un operador que funciona en compile-time, a diferencia de una llamada de funcion que es en run-time.
-		
-		Ej:
-			int *x = malloc(10*sizeof(int));
-			printf("%d\n",sizeof(x));
-
-			Primero se declara espacio para un array de 10 integers, pero cuando se llama a sizeof(), dara un valor chico, como 4, es porque en este caso sizeof() esta viendo el tamaño de un pointer a un entero.
-
-			int x[10];
-			printf("%d\n",sizeof(x));
-
-			En este caso, hay suficiente informacion estatica para que el compilador sepa que 40 bytes fueron resevados.
-			Para strings, es mejor malloc(strlen(s)+1); , ya que asi se para el largo del string y +1 para el caracter de final de linea.
-
-		La funcion retorna un pointer a void,devolviendo asi una direccion de memoria, por lo que es usual que en C se realize lo que se llama "cast", como anteriormente en "double...", no es estrictamente necesario pero es una manera de saber que se esta haciendo.
-	free:
-		void free(void *ptr);
-		int *x = malloc(10 * sizeof(int));
-		...
-		free(x);
-
-		toma el puntero retornado por malloc.
-
-Llamadas de terminal:
-	objdump: recibe el archivo compilado y lo traduce a assembly
-
-definiciones:
-	base:					direccion base del proceso
-	bound:					direccion limite del proceso, ambas se utilizan para realizar tranducciones de direcciones y verificar los limites de uso.
-	PCB:					process control block, estructura de datos donde se guarda la informacion del proceso(direccion, bounds,id,etc.)
-	free-list:				lista de los espacios libres en memoria
-	paging:					asignar espacio en tamaños predefinidos en memoria virtual.
-	page:					separar la direccion de espacio del proceso en dos espacios predefinidos, a cada uno se le llama page.
-	page-frame:				la memoria fisica se la ve como un array de lugares de espacios predefinidos llamados page-frames.
-	page-table:				estructura de datos que guarda la direccion de cada virtual page ubicada en memoria fisica.
-	virtual page number:	(VPN) numero referente a la virtual page.
-	offset:					lugar en donde nos interesa de la page.
-	physical frame number:	(PFN) o physical page number(PPN), es el numero de page frame donde esta ubicado la virtual page en la memoria fisica.
-	page table entry:		estructura de datos que se utiliza para mapear direcciones virtual a direcciones fisicas.
-	address-translation:	tranduccion de difreccion de memoria vitual a direccion memoria fisica.
-	TLB:					translation-lookaside buffer, una parte del chip de MMU(memory management unit), que funciona como un cache de las translaciones de las direciones virtuales a fisicas mas populares.
-
-base and bounds vitualisation
-	add the base to the virtual address --> phisicall address
 	
+
+	El programa realmente no esta en una direccion de memoria fisica de 0 a 16kb, sino que esta cargada en alguna direccion fisica arbitraria.
+	cuando el SO hace esto, se le llama Virtualizacion de la memoria, porque el programa corriendo piensa que esta cargado en memoria 0 y que tiene una espacio de direccion largo, lo cual no es cierto.
+	
+	Objetivos:
+		transparencia:	El programa no debe saber que la memoria esta virtualizada, detras de escena el SO realiza todo el trabajo de mulitplexar la memoria sobre los demas procesos.
+		Eficiencia:		El SO debe hacer la Virtualizacion lo mas eficiente posible, en terminos de tiempo y espacio, para el tiempo puede ayudarse del hardware mediante TLB's.
+		Proteccion:		El SO debe asegurarse de protejer el procesos de otro y de si mismo, asi no se pisan entre si o modifican. Esta misma da la ventaja de "aislamiento" entre procesos, permitiendo asi que cada proceso se ejecute en su propia caja.
+	
+	Esquema simple de memoria:
+		____
+		program code
+		heap
+		  |
+		  v
+	
+		  ^
+		  |
+		stack
+		_____
+	
+	
+	tipos de memoria
+		en un programa de c, hay dos tipos stack y heap.
+		stack, donde se realizan allocation y deallocations, y son manejas por el compilador.(memoria automatica, Pe. int x;)
+		heap, donde todas las allocation y deallocations son realizadas por el usuario.(Pe. int *x = (int *)malloc(sizeof(int)); )
+	
+	Funciones:
+		malloc:
+			void* malloc(size_t size);
+			double* d = (double *)malloc(sizeof(double));
+			Es "mas comodo" pasar por parametro a sizeof() el typo en ves de a malloc los bytes.
+			sizeof() es un operador que funciona en compile-time, a diferencia de una llamada de funcion que es en run-time.
+			
+			Ej:
+				int *x = malloc(10*sizeof(int));
+				printf("%d\n",sizeof(x));
+	
+				Primero se declara espacio para un array de 10 integers, pero cuando se llama a sizeof(), dara un valor chico, como 4, es porque en este caso sizeof() esta viendo el tamaño de un pointer a un entero.
+	
+				int x[10];
+				printf("%d\n",sizeof(x));
+	
+				En este caso, hay suficiente informacion estatica para que el compilador sepa que 40 bytes fueron resevados.
+				Para strings, es mejor malloc(strlen(s)+1); , ya que asi se para el largo del string y +1 para el caracter de final de linea.
+	
+			La funcion retorna un pointer a void,devolviendo asi una direccion de memoria, por lo que es usual que en C se realize lo que se llama "cast", como anteriormente en "double...", no es estrictamente necesario pero es una manera de saber que se esta haciendo.
+		free:
+			void free(void *ptr);
+			int *x = malloc(10 * sizeof(int));
+			...
+			free(x);
+	
+			toma el puntero retornado por malloc.
+	
+	Llamadas de terminal:
+		objdump: recibe el archivo compilado y lo traduce a assembly
+	
+	definiciones:
+		coalescing:				"concatenar" los free-space para asi evitar fragmentacion
+		base:					direccion base del proceso
+		bound:					direccion limite del proceso, ambas se utilizan para realizar tranducciones de direcciones y verificar los limites de uso.
+		PCB:					process control block, estructura de datos donde se guarda la informacion del proceso(direccion, bounds,id,etc.)
+		free-list:				lista de los espacios libres en memoria
+		paging:					asignar espacio en tamaños predefinidos en memoria virtual.
+		page:					separar la direccion de espacio del proceso en dos espacios predefinidos, a cada uno se le llama page.
+		page-frame:				la memoria fisica se la ve como un array de lugares de espacios predefinidos llamados page-frames.
+		page-table:				estructura de datos que guarda la direccion de cada virtual page ubicada en memoria fisica.
+		virtual page number:	(VPN) numero referente a la virtual page.
+		offset:					lugar en donde nos interesa de la page.
+		physical frame number:	(PFN) o physical page number(PPN), es el numero de page frame donde esta ubicado la virtual page en la memoria fisica.
+		page table entry:		estructura de datos que se utiliza para mapear direcciones virtual a direcciones fisicas.
+		address-translation:	tranduccion de difreccion de memoria vitual a direccion memoria fisica.
+		TLB:					translation-lookaside buffer, una parte del chip de MMU(memory management unit), que funciona como un cache de las translaciones de las direciones virtuales a fisicas mas populares.
+	
+	base and bounds vitualisation
+		add the base to the virtual address --> phisicall address
+	
+Concurrencia
+	este capitulo refiere al estilo de programacion concurrente,
+	en donde multiples procesos/threads se ejecutan, de modo tal
+	que existe la posiblidad de que se entrelacen y produzcan
+	un resultado no esperado debido a problemas no manejados.
+	
+
+	TCB: thread control block
+	race condition(data race): the results depend on the timing of code execution.
+	critical section: a piece of code that accesses a shared variable and must not
+		be concurrently executed by more than one thread
+	mutual exclusion: a property that guarantees that if one thread is executing 
+		within the critical section, the others will be prevented from doing so.
+	
+	thread creation
+		pthread_t	*thread					//current thread
+		const pthread_attr_t	*attr		//attributes
+		void	*(*start_routine) (void*)	//function pointer
+		void	*arg						//arguments of the function
+	thread completion
+		to wait for completion use:
+		ptread_join(pthread_t thread,	//which thread to wait
+					void **value_ptr	// pointer to the return value you expect to get back
+					)
+	locks
+		When you have a region of code that is a critical section, and thus needs
+		to be protected to ensure correct operation, locks are quite useful.		
+	semaphores
+		condition/variable primitive
+		way to prevent other process to interfiere during another.
+	
+Persistencia:
+	I/O DEVICES
+	DMI = direct media iterface
+	ATA = Advanced Techonology attachment
+	SATA = serial ATA
+	eSATA = external SATA
+	USB = universal seriel bus
+	PCIe = peripheral component interconnect express
+	firmware = software wihtin a hardware device
+
+	SCSI = small computer system interface
+
+	While (STATUS == BUSY)
+		; // wait until device is not busy
+	Write data to DATA register
+	Write command to COMMAND register
+		(starts the device and executes the command)
+	While (STATUS == BUSY)
+		; // wait until device is done with your request
+
+	PIO = programed I/O
+	livelock = only interrupts and no user-level process can run
+	DMA = direct memory access, facilita la trasferencia entre memoria y dispositivos
+	memory mapped I/O = devices registers as memory locations
+	device driver = a piace of software that knows how a device works
+
+	IDE disk:
+		registers:
+			control
+			command block
+			status
+			error
+
+	Hard disk drive
+		disk drive:
+			number of sectors(512byte blocks)
+				sector: A sector is the smallest addressable unit of storage on a disk.
+						Sectors are the physical divisions on a disk.(typical size 512 bytes)
+				Blocks: A block is a unit of data used by the file system or operating
+						system to read from or write to storage.
+						Blocks are the logical units used by file systems.
+			can be read or write
+			sectors are numbered from 0 to n-1(on disk with n sectors)
+			0 to n-1 is the address space of the drive
+			single 512 byte write is atomic
+		geometry:
+			platter:	circular hard s0urface, which data is store percistently by magnetic changes.
+							A disk may have 1 or more, each one has 2 sides called surface.
+			spindle:	spins the platters arround as a cosntant(fixed) rate(RPM).
+			track:		a concentric circle. Data is stored on each surface in concentric circles
+							of sectors.
+			disk head:	mechanism that allow to read and write.
+			disk arm:	where the disk head is attached, moves across the surface to position the
+							head over the desired track.
+
+	seek:				Operation, where it moves the arm to the needed track.
+	rotational delay:	time that the disk has to wait for the head to reach the desire sector.
+	transfer:			Data is either read/write to the surface.
+	zone:				consecutive set of traks on a surface.
+	multi-zone dd:		the disk is organized into multiple zones. each zone has the same number
+							of sectors per track, and outer zones have more sectors than inner ones.
+	cache:				(track buffer), small amount of memory(8-16MB) which the drive use to hold data
+							read from o written to the disk. The drive can decide to read all of
+							sectors and cache into memory, so that allows the drive to quickly respond
+							to any subsequent requests.
+
+	how to get the the time per rotation in ms only with RPM:
+		RPM = rotation per minute
+		time(ms)/1 rotation = 1 minute/10,000 rotations * 60 seconds/1 minute * 1000ms/1 second
+		60.000ms/10.000 Rot = 6ms/rotation
+
+		100MB/second = transfer rate of a disk
+		how long does it take to transfer a 512 block in ms?
+		512KB/1 request = 1 MB/1024 KB * 1 second/100 MB * 1000 ms/1 second
+		= 5 ms/request
+
+	io_time = seek_time + rotation_time + transfer_time
+	rate_io = transfer_size/io_time
+
+	random workload = 		read to random locations on the disk
+	sequential workload =	read a large number of sectors consecutively from the disk without jumping
+								arround.
+
+	average seek distance = 1/3 * N
+		N = full time seek
+	
+	disk scheduler tries to follow SJF in its operation.
+	
+	SCHEDULING:
+		SSTF:	shortest seek time first, orders the queue of I/O request by track, picking request on the
+					nearest position track to compleate first.
+		NBF:	nearest block first, schedules tje request with the nearest block address next.
+	
+	elevation algorithm(starvation):
+		SCAN:	algorithm, that moves back and forth across the disk servicing request in order across the
+					tracks. A single pass across the disk(inner to outer,..) a sweep, if a request comes from
+					a block on a track that has already been serviced on this sweep, it is no handled
+					immediately, but rather queued until the next sweep(in the other direction).
+		F-SCAN:	freezes the queue to be serviced when it is doing a sweep.
+		C-SCAN:	circular SCAN, sweeps from outer to inner, and resets at the outer track to begin again.
+
+	SCHEDULING:
+		SPTF:	shortest positioning time first/shortest access time first(SATF), takes the nearest to access
+					track based on seek time and rotation time.
+	
+
+	RAIDs = Redundant Arrays of Inexpensive Disks, technique to use multiple disks in
+				concert to build a faster, bigger, and more reliable disk system.
+	
+		fault model:
+			fail-stop:	working or failed, with a working disk, all
+							blocks can be read or written. In contrast, when a disk has failed, we
+							assume it is permanently lost.
+
+		evaluate a RAID:
+			by capacity: given a N set of disks each with B blocks, the amount of usefull capacity available
+							to clients is N*B, if a system keeps two copies of each block(mirroing), we obtain
+							(N*B)/2.
+			by reliability: How many disk faults can the given design tolerate?
+			by performance: depends heavily on the workload presented to the disk array.
+		
+		Designs:
+			RAID level 0:	striping
+				spread the blocks of the array across the disk in a round-robin fashion(extracts parallelism)
+				chunk size = amount of blocks
+			RAID level 1:	mirroing
+			RAID level 4/5:	parity-based redundancy
+		

@@ -1,0 +1,159 @@
+Ejercicio 1:
+    a-b)
+    Valor final	escenario de ejecucion	
+    4	        ABC 12 abc	
+    2	        A1a B2b Cc	
+    2	        A1a Bb Cc 2	
+    3	        12 a ABC bc
+
+    c)  (3+2+3)!/(3!2!3!) = 40320/72 = 560
+
+Ejercicio 2:
+    a) No nunca, pero igual cada componente es infinita, el scheduler va a ir y
+    venir entre uno y el otro pero no terminarían ambas
+    componentes igual
+
+    b) 0,1 y 2, porque es el rango desde 0 hasta la posibilidad de x++(p0) y x++(p1).
+
+Ejercicio 3:
+    {PRE: cont ^ x = 1 ^ y = 2}
+    P0		                    P1
+ (a)  while(cont && x<20){	 (1)  y = y + 2;
+ (b) 	x=x*y;	             (2)  cont = false
+    }
+    {POS: ¬cont ^ x = ? ^ y = ?}
+
+    a)  (1,4)   p1,p0
+        (2,4)   a,b,1,2
+        (4,4)   a,1,2,b
+        (8,4)   a,b,a,b,a,b,1,2
+        (16,4)  a,b,a,b,a,b,a,b,1,2
+        (32,4)  p0,p1
+        (64,4)  1,a,b,a,b,a,b,2
+    b)
+        y = {3,4}
+        x = {1,2,3,4,6,8,9,12,16,18,24,32,36,48,...}
+
+Ejercicio 4:
+    nah
+
+Ejercicio 5:
+    {PRE: init(m) ^ cont ^ x = 1 ^ y = 2}
+	P0			                P1
+    (a) while(cont && x<20){    (1) mutex_lock(m);
+    (b)	    x=x*y;	            (2)	y=y+1;
+        }        	            (3)	y=y+1;
+                                (4) mutex_unlock(m);
+	    			            (5) cont = false
+    {POS: ¬cont ^ x = ? ^ y = ?}
+
+Ejercicio 6:
+    {PRE: init(mutex)}
+    p0                  p1
+    (a) lock(mutex);    (1) lock(mutex);
+    (b) x = x + 1;      (2) x = x + 1;
+    (c) unlock(mutex);  (3) unlock(mutex);
+
+Ejercicio 7:
+    tabla enorme...
+
+Ejercicio 8:
+    (c0,t) = (true,1)   c0 = true;  t = 1;
+                        t = 1;      c0 = true;
+
+    (c1,t) = (true,0)   c1 = true;  t = 0;
+                        t = 0;      c1 = true;
+
+    t = 1;       t = 0;       en la lineas entre "{region critica}" y while();
+    c0 = true;   c1 = true;
+    no hay exclusion mutua
+
+    ####(1)
+    t = 1
+    t = 0
+    c1 = true
+    no loop for p1 -> enters critic region
+    comesback to p0, {c1 = true and t = 0}
+    c0 = true
+    no loop for p0 -> enters critic region
+
+    ####(2)
+    t = 1;       c1 = true;
+    c0 = true;   t = 0;
+
+    123ABCDEG457 -> enters critic region
+
+    ####(3)
+    c0 = true;  t = 0;
+    t = 1;      c1 = true;
+
+    ABC123457DEG -> enters critic region
+
+    ####(4)
+    c0 = true;   c1 = true;
+    t = 1;       t = 0;
+
+    es el algoritmo de peterson
+
+Ejercicio 9:
+    pass
+
+Ejercicio 10:
+
+    a)
+    sem s1,s2,s3
+    sem_init(s1,0)
+    sem_init(s2,0)
+    sem_init(s3,0)
+
+                sem_down(s1)	sem_down(s2)	sem_down(s3)
+    A           B	            C	            D
+    sem_up(s1)  sem_up(s2)	    sem_up(s3)
+
+    b)
+    sem sB,sD
+    sem_init(sB,0)
+    sem_init(sD,0)
+
+    	sem_down(sB)
+    A   B
+        sem_up(sB)
+	    sem_down(sD)
+    C	D
+        sem_up(sD)
+    
+    c)
+    sem sB, sC, sD
+    sem_init(sB)
+    sem_init(sC)
+    sem_init(sD)
+                
+                sem_down(sB)
+                B               sem_down(sD)
+                sem_up(sD)      sem_down(sD)
+    A                           D
+    sem_up(sB)  
+    sem_up(sC)
+                sem_down(sC)
+                C
+                sem_up(sD)
+
+    d) similar shit
+
+Ejercicio 11:
+    add semaphores to ej1 and ej4
+
+Ejercicio 12:
+    para {0,0} sucede deadlock
+    para {0,1} sucede pong, ping, pong, ping, ....
+    para {1,0} sucede ping, pong, ping, pong, ....
+    para {1,1} sucede ping, pong, pong, ping, ping, pong, .....
+
+Ejercicio 13:
+    consumer/producer
+
+Ejercicio 14:
+    pass
+
+Ejercicio 15:
+    no, ya que al "matar" un proceso, se liberan inmediatamente sus recursos
