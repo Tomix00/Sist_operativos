@@ -12,7 +12,7 @@ Virtualizacion de la cpu
 
 	T_arrival:		tiempo de llegada de un proces
 	T_completion:	tiempo cuando termina un proceso
-	T_firstrun:		tiempo en que es Scheduled
+	T_firstrun:	tiempo en que es Scheduled
 
 	T_turnaround:	T_completion - T_arrival
 	T_response:		T_firstrun - T_arrival
@@ -130,14 +130,14 @@ Concurrencia
 		within the critical section, the others will be prevented from doing so.
 	
 	thread creation
-		pthread_t	*thread					//current thread
-		const pthread_attr_t	*attr		//attributes
+		pthread_t	*thread			//current thread
+		const pthread_attr_t	*attr	//attributes
 		void	*(*start_routine) (void*)	//function pointer
-		void	*arg						//arguments of the function
+		void	*arg			//arguments of the function
 	thread completion
 		to wait for completion use:
 		ptread_join(pthread_t thread,	//which thread to wait
-					void **value_ptr	// pointer to the return value you expect to get back
+				void **value_ptr	// pointer to the return value you expect to get back
 					)
 	locks
 		When you have a region of code that is a critical section, and thus needs
@@ -229,8 +229,7 @@ Persistencia:
 	sequential workload =	read a large number of sectors consecutively from the disk without jumping
 								arround.
 
-	average seek distance = 1/3 * N
-		N = full time seek
+	average seek distance = 1/3 * N (N = full time seek)
 	
 	disk scheduler tries to follow SJF in its operation.
 	
@@ -273,4 +272,10 @@ Persistencia:
 				chunk size = amount of blocks
 			RAID level 1:	mirroing
 			RAID level 4/5:	parity-based redundancy
-		
+	
+	FAT = File Alocation System
+	xv6 file system
+		block size = 512 bytes
+		12 direct blocks
+		1 indirect block
+		indices de bloques de 32 bits(4 bytes)
