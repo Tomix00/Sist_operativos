@@ -1,0 +1,336 @@
+Ejercicio 1:
+    8TiB
+    7200 RPM
+    4.16ms latencia de busqueda
+    215 MiB/s tasa de transferencia
+
+    a)
+        time(ms)/Rotation = 1m/7200R * 60s/1m * 1000ms/1s = 60*1000ms/7200R
+                          = 60*1000ms/7200R = 60.000ms/7200R = 8.33ms/R
+    b)
+        lectura al azar a bloques de 4096 bytes(4KiB)
+
+
+        latencia de busqueda = seek time
+        seek time = 4.16ms
+
+        T(I/O) = T(seek) + T(rotation) + T(transfer)
+        T(I/O) = 4.16ms + 4.16ms + T(transfer)
+
+        T(transfer) = 4KiB * 1MiB/1024KiB * 1s/215MiB * 1000ms/1s
+        = 4*1000ms/1024*215
+        = 4*1000ms/1024*215
+        = 4000ms/220160
+        = 0.01816ms
+
+        T(I/O) = 4.16ms + 4.16ms + 0.01816ms
+        T(I/O) = 8.338ms
+
+        R(I/O) = amount of data/time to access = 4KiB/T(I/O)
+               = 4KiB/8.338ms
+               = 4096B/0.008338s
+               = 491244 B/s
+               = 479 KiB/s
+               = 0.468 MiB/s
+
+Ejercicio 2:
+        a)
+            FAT12 = numeros dentro de la FAT tienen 12bits = 1.5 bytes
+            puedo redireccionar a 2^12 = 4096 
+
+            cluster = 512bytes = 0.5KiB
+            Diskete 360 KiB -> cuantos cluster necesito?
+
+            1 cluster = 512bytes
+            x clusters = 360 KiB
+
+
+            x = 360KiB * 1cl/512bytes
+              = 360*(2^10)bytes * 1cl/512bytes = 720 clusters
+              = 360*1024 * 1cl/512 = 720 clusters
+
+
+            si cada cluster en la FAT ocupa 1.5 bytes, la FAT ocupa:
+
+            720 * (1.5) = 1080bytes
+        b)
+            FAT16 => 16bits = 2bytes
+
+            cluster size = 4096 bytes
+            disk size = 4GiB = 4.294.967.296 bytes
+
+            amount of clusters = disk size/cluster size
+                               = 4.294.967.296 bytes/4096 bytes
+                               = 4.294.967.296 bytes/4096 bytes
+                               = 1.048.576 clusters
+            
+            FAT size = amount of clusters * entrie size
+                     = 1.048.576 * 2 bytes
+                     = 2.097.152 bytes = 2.048 KiB = 2 MiB
+        c)
+            FAT32 => 32bits = 4bytes
+            
+            cluster size = 16.384 bytes
+            disk size = 32 GiB = 34.359.738.368 bytes
+
+            amount of clusters = 34.359.738.368 bytes/16.384
+                               = 2.097.152 clusters
+
+            FAT size = 2.097.152 * 4 bytes = 8.388.608 bytes = 8.192 KiB = 8 MiB
+
+Ejercicio 3:
+    block = 512 bytes
+    12 direct blocks
+    1 indirect block
+    indices de bloque de 32 bits
+
+    
+
+    1) tamaño maximo de un archivo
+        Tamaño maximo de un archivo = direct block size + indirect block size
+
+        direct block size = block size * amount of direct blocks
+                          = 512 bytes * 12
+                          = 6144 bytes
+        indirect block
+            un indice de bloque de 32bit(4 bytes) puede
+                apuntar a 2^32/512 = 8.388.608 bloques
+            indirect size block = 512 bytes * 8.388.608 blocks
+                                = 4.294.967.296 bytes
+        
+        file maximum size = 6144 bytes + 4.294.967.296 bytes
+                          = 4.294.973.440 bytes
+                          = ~3.99GiB
+    2)
+        Para un archivo de tamaño máximo, la mayor parte de la sobrecarga se
+        encuentra en el bloque indirecto. Cada puntero en el bloque indirecto
+        ocupa 4 bytes.
+
+        inode size = 128 bytes
+        indirect size block = 512 bytes
+
+        sobrecarga total = 128 bytes + 512 bytes = 640 bytes
+    3)
+        Es técnicamente posible codificar los números de bloque con menos bits,
+        hacerlo tendría consecuencias significativas en términos de limitaciones
+        de tamaño de archivo y capacidad del sistema de archivos. La elección de
+        cuántos bits usar para los números de bloque debe considerar factores
+        como la naturaleza del uso de archivos, el tamaño de los datos y las
+        necesidades de rendimiento adecuadas para el sistema en cuestión. En
+        general, es un compromiso entre eficiencia y capacidades.
+
+Ejercicio 4:
+    block size = 512 bytes
+    12 direct blocks
+    1 indirect block
+    indices de bloques de 32 bits(4 bytes)
+
+    a)
+        direct blocks size = 512 * 12 = 6144 bytes
+
+        para el byte 451, se accede al bloque directo 0
+
+        para el byte 6200 ya debemos acceder a los indirectos
+            posición = 6200 - 6144 = 56
+                floor(56/512) = floor(~0.109) => 0
+                bloque 0
+        por lo tanto:
+        para el byte 6200 ya debemos acceder al bloque indirecto y al bloque 0
+
+        para el byte 71.000, debemos acceder a los indirectos
+            posicion = 71.000 - 6144 = 64.856 bytes
+            floor(64.856/512) = floor(126,67) = 126
+            bloque 126
+        para el byte 71.000 debemos acceder al bloque indirecto y al bloque 126
+    b)
+        bloque(x)={
+            0 <= x <= 6144      floor(x/512)
+            6144 <= x <= 71680  floor((x-6144)/512)
+        }
+
+Ejercicio 5:
+    disk    size                    = 16 TiB (2^44 bytes)
+    block   size                    = 4  KiB (2^12 bytes)
+    index   block                   = 32 bits (4 bytes)
+    i      -nodes level indirection = 3
+    direct  block pointers          = 8
+
+    direct block size:
+        8 direct block pointers
+        4 KiB block size
+
+        8 * 4 KiB = 2^3 * 2 ^12 bytes = 2^15 bytes = 32 KiB
+    
+    indirect block size:
+        como hay 3 niveles
+        indireccion simple(1):
+            un inode tiene un puntero de indireccion simple,
+                que apuntan a bloques
+            un bloque de 4 KiB, contiene punteros de 32 bits
+            numeor de punteros por bloque es = 4 KiB / 32 bits 
+                                             = 2^12 bytes / 4 bytes
+                                             = 1024 punteros
+            como cada puntero, apunta a otro bloque de 4 KiB,
+            1024 * 4 KiB/puntero = 2^10 * 2^12 bytes = 4 MiB
+        indireccion doble(2):
+            sera,
+            1024 punteros * 1024 punteros * 4 KiB/puntero =
+            = 2^10 * 2^10 * 2^12 bytes
+            = 2^32 bytes
+            = 4 GiB
+        indireccion triple(3):
+            1024^3 punteros * 4KiB/puntero = 
+            = 2^30 * 2^12 bytes
+            = 2^42 bytes
+            = 4 TiB
+    
+    Tamaño máximo de archivo = Tamaño por punteros directos + 
+                               Tamaño por indireccion simple +
+                               Tamaño por indireccion doble +
+                               Tamaño por indireccion triple
+    
+    Tamaño máximo de archivo = 32 KiB + 4 MiB + 4 GiB + 4 TiB
+
+Ejercicio 6:
+    El sistema de archivos de xv6, tiene la estructura de:
+    12 direct blocks
+    1 indirect block
+    1 doble indirect block
+    block size = 512 bytes
+
+    a)
+        para agregar 6000 bytes,
+        bloques = ceiling(6000/512) = ceiling(11,71) = 12 bloques
+        P1 -> BD1
+        P2 -> BD2
+        ...
+        P12 -> BD12
+        Pindirecto <sin usar>
+        P2indirecto <sin usar>
+
+    b)
+        para agregar 1000 bytes mas, en total 7000
+        bloques = ceiling(7000/512) = ceiling(13,67) = 14
+        12 bloques directos
+        13 y 14 en el bloque indirecto
+        
+        P1 -> BD1
+        P2 -> BD2
+        ...
+        P12 -> BD12
+        Pindirecto -> P13 -> BD13
+                   -> P14 -> BD14
+        P2indirecto <sin usar>
+
+Ejercicio 7:
+    weird
+
+Ejercicio 8:
+    Iu, Free => {0,0}, refiere a los bloques que estan ocupados, pero en
+                       realidad estan libres. Se produce un error, ya que los
+                       bloques quedan sin uso al ser considerados ocupados por
+                       el sistema.
+             => {0,1}, es un caso correcto, donde el bloque no esta siendo
+                       utilizado, y lo marca como libre.
+             => {1,0}, caso correcto, contrario al anterior, el bloque esta en
+                       uso, por lo tanto no esta libre.
+             => {1,1}, refiere a bloques que el mapa de bits marca como libres,
+                       pero en realidad están referenciados por un archivo o
+                       directorio. Este caso incurre en un error grave ya que
+                       si el sistema asigna este bloque a otro archivo (puesto
+                       que según su mapa de bits está libre) produce una
+                       corrupción de datos al sobreescribir dos archivos en la
+                       misma ubicación.
+
+Ejercicio 9:
+    a)
+        lectura del directorio raiz
+        lectura del inode de initrd.img
+        lectura de los bloque de datos del archivo initrd.img
+    b)
+        lectura del directorio root /
+        lectura del directorio /usr
+        lectura del directorio /usr/games
+        lectura del inode de moon-buggy
+        lectura de los bloques de datos del archivo moon-buggy
+
+Ejercicio 10:
+    Si los datos más utilizados de un archivo (como cabeceras o metadatos) se
+    encuentran en el i-nodo, el acceso a ellos podría ser más rápido, ya que el
+    i-nodo es parte de la estructura de datos que se carga al acceder al
+    archivo. A su vez, se disminuye la cantidad de accesos a disco.
+
+    Pero, de este modo, se limita el tamaño del inode, es mas compleja la
+    gestion de archivos, pueden haber problemas de fragmentacion, etc.
+
+Ejercicio 11:
+    Por la simple razon de que es mas simple, que tener que recorrer el grafo.
+
+Ejercicio 12:
+    ni idea men
+
+Ejercicio 13:
+    Si se permitieran enlaces duros a directorios, podría crearse una estructura
+    cíclica en la jerarquía de archivos. Esto significaría que un directorio
+    podría referirse a sí mismo, ya sea directamente o a través de otros
+    directorios. Esto complicaría el proceso de navegación por el sistema de
+    archivos y podría llevar a bucles infinitos en operaciones que recorren los
+    directorios.
+
+Ejercicio 14:
+    Log Filesystem: Se centra en registrar las operaciones a realizar para
+                    permitir la recuperación; no necesariamente mantiene un
+                    estado estructurado o consistente de metadatos.
+    Journaling Filesystem: Mantiene un diario donde se registran las operaciones
+                           y metadatos relacionados para garantizar que el
+                           sistema de archivos vuelva a un estado consistente
+                           tras un fallo.
+
+Ejercicio 15:
+    Capa de aplicacion: Esta capa es la más alta y proporciona la interfaz
+                        mediante la cual los usuarios y las aplicaciones
+                        interactúan con el sistema de archivos. Incluye las APIs
+                        y comandos a través de los cuales los usuarios pueden
+                        realizar operaciones como crear, leer, escribir o
+                        eliminar archivos y directorios.
+    Capa de Gestión del Sistema de Archivos (Filesystem Management): Esta capa
+                        se encarga de la organización lógica de los datos en el
+                        sistema de archivos, incluyendo la estructura de
+                        carpetas y archivos, así como los metadatos
+                        asociados (como permisos, timestamps, etc.). Esta capa
+                        gestiona cómo los datos son almacenados físicamente.
+    Capa de Dispositivos (Device Layer): Esta es la capa más baja que se ocupa
+                        de la interacción directa con el hardware de
+                        almacenamiento, como discos duros, SSDs, etc. Se encarga
+                        de la gestión de las operaciones E/S (entrada/salida) y
+                        del almacenamiento físico de los datos.
+
+Ejercicio 16:
+    a) V, Asi permiten a la CPU realizar otras tareas mientras se realiza I/O.
+    b) V, Cuando un directorio alcanza su capacidad maxima, puede solicitar mas
+          bloques para almacenar informacion adicional.(ext3,ext4)
+    c) F, Los inodos son únicos para cada partición.
+    d) V
+    e) V, si se utilizan todos los inodes, no se pueden crear mas archivos
+          incluso si no esta completamente lleno el disco.
+    f) V, En FAT si es info redundante ya que se puede reconstruir, aunque este
+          proceso es ineficiente.
+       F, En caso de un UFS si es necesario, ya que este no tiene un EOF, por lo
+          que no se podría saber cuándo termina el archivo.
+    g) V, Si un archivo ocupa menos de un bloque completo, el sistema de
+          archivos seguirá utilizando todo el bloque para almacenar el archivo.
+          Esto significa que, aunque el archivo solo tenga, digamos, 1 KB de
+          datos, seguirá ocupando 4 KB en el disco, lo que implica un uso de
+          espacio en disco mayor que la longitud del archivo.
+    h) F, Ya que solo se elminan los metadatos.
+    i) F, Figura 1 - Ejercicio 2
+    j) F, Ambos sistemas de archivos son capaces de manejar un número elevado
+          de entradas en los directorios y están diseñados con la escalabilidad
+          en mente.
+    k) V, tambien sirve para agrandar el tamaño del mismo.
+
+Ejercicio 17:
+    meh
+
+Ejercicio 18:
+    meh
